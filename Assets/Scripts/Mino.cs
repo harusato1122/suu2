@@ -25,9 +25,14 @@ public class Mino : MonoBehaviour
         Value = value;
         isNumber = IsNumber(value);
 
+        string displayValue = value switch
+        {
+            "/" => "€",
+            _ => value
+        };
         if (textMesh != null)
         {
-            textMesh.text = value;
+            textMesh.text = displayValue;
         }
     }
 

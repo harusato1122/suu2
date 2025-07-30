@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
 using System;
@@ -8,10 +9,11 @@ public class suusuuGameController : MonoBehaviour
 {
     public GameObject[] tsumPrefabs;
     public Transform spawnPoint;
-    public float spawnInterval = 1.5f;
+    public float fiverInterval = 1.0f;
     public float maxConnectDistance = 1.5f;
     public int MaxMino = 40;
     public List<string> valueList = new List<string>();
+    public TextMeshProUGUI scoreText;
     public TextMeshProUGUI tsumValueText;
 
     private float timer;
@@ -19,6 +21,12 @@ public class suusuuGameController : MonoBehaviour
     private List<GameObject> selectedTsums = new List<GameObject>();
     private Camera mainCamera;
     private LineRenderer lineRenderer;
+    private int fiverPoint = 0;
+    private int fiverPointplus = 10;
+    private int fiverPointMax = 100;
+    private bool isFiver = false;
+    public Slider fiverSlider;
+    public double Score = 0;
 
     void Start()
     {
@@ -44,15 +52,22 @@ public class suusuuGameController : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        /*if (timer >= spawnInterval)
+        if (timer >= fiverInterval && isFiver)
         {
-            SpawnTsum();
+            fiverPoint -= fiverPointplus; 
+            if( fiverPoint <= 0)
+            {
+                isFiver = false;
+                fiverPoint = 0;
+            }
             timer = 0f;
-        }*/
+        }
 
         HandleMouseInput();
         UpdateLine();
         tsumValueText.text = GetSelectedString();
+        fiverSlider.value = (float)fiverPoint / fiverPointMax;
+        scoreText.text = "Score: " + Score.ToString("F2");
     }
 
     void SpawnTsum()
@@ -111,14 +126,18 @@ public class suusuuGameController : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            if (selectedTsums.Count >= 3 && IsValidEquationChain(GetSelectedString()))
+            if (selectedTsums.Count >= 3 && IsValidEquationChain(GetSelectedString(),isFiver))
             {
                 foreach (var tsum in selectedTsums)
                 {
                     tsumList.Remove(tsum);
                     Destroy(tsum);
                 }
-                for (int i = 0; i < selectedTsums.Count; i++) SpawnTsum();
+                for (int i = 0; i < selectedTsums.Count; i++)
+                {
+                    SpawnTsum();
+                    FiverPlus();
+                }
             }
             else
             {
@@ -180,7 +199,7 @@ public class suusuuGameController : MonoBehaviour
         return result;
     }
 
-    public static bool IsValidEquationChain(string input)
+    public bool IsValidEquationChain(string input, bool allowError = false)
     {
         try
         {
@@ -189,19 +208,22 @@ public class suusuuGameController : MonoBehaviour
                 return false;
 
             List<double> results = new List<double>();
-
             foreach (string expr in expressions)
             {
                 var value = EvaluateExpression(expr);
                 results.Add(value);
             }
 
+            double mean = results[0];
             for (int i = 1; i < results.Count; i++)
             {
-                if (Math.Abs(results[i] - results[i - 1]) > 0.00001)
+                double tolerance = allowError ? 10.0 : 0.00001;
+                if (Math.Abs(results[i] - results[i - 1]) > tolerance)
                     return false;
+                mean += results[i];
             }
 
+            Score += mean / results.Count;
             return true;
         }
         catch
@@ -227,9 +249,22 @@ public class suusuuGameController : MonoBehaviour
             if (rb != null)
             {
                 float xForce = UnityEngine.Random.Range(-5f, 5f);
-                float yForce = UnityEngine.Random.Range(0f, 10f);
+                float yForce = UnityEngine.Random.Range(0f, 4f);
                 rb.AddForce(new Vector2(xForce, yForce), ForceMode2D.Impulse);
             }
+        }
+    }
+
+    public void FiverPlus()
+    {
+        if (isFiver) return;
+
+        fiverPoint += fiverPointplus;
+        if(fiverPoint >= fiverPointMax)
+        {
+            isFiver = true;
+            timer = 0f;
+            fiverPoint = fiverPointMax;
         }
     }
 }
