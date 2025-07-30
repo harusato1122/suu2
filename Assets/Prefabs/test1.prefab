@@ -250,6 +250,7 @@ GameObject:
   - component: {fileID: 8137995946596230602}
   - component: {fileID: 7396147402842492787}
   - component: {fileID: 6051574226937806002}
+  - component: {fileID: 4448209074045078952}
   m_Layer: 0
   m_Name: test1
   m_TagString: Mino
@@ -267,8 +268,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.1712794, y: 5.509983, z: 0}
-  m_LocalScale: {x: 1, y: 1.1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8800001, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2307405303756490936}
   m_Father: {fileID: 0}
@@ -340,7 +341,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0.3
   m_Material: {fileID: 6200000, guid: cd5f606c40d6e644ea442efedaf661ef, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -387,3 +388,17 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 1}
   m_Direction: 0
+--- !u!114 &4448209074045078952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6199845945493356362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c3e6a12f67b9574799d35026fd047c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isNumber: 0
+  Value: 

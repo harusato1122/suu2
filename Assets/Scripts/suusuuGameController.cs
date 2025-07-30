@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
+using System;
+using System.Data;
 
 public class suusuuGameController : MonoBehaviour
 {
@@ -8,6 +11,8 @@ public class suusuuGameController : MonoBehaviour
     public float spawnInterval = 1.5f;
     public float maxConnectDistance = 1.5f;
     public int MaxMino = 40;
+    public List<string> valueList = new List<string>();
+    public TextMeshProUGUI tsumValueText;
 
     private float timer;
     private List<GameObject> tsumList = new List<GameObject>();
@@ -47,20 +52,28 @@ public class suusuuGameController : MonoBehaviour
 
         HandleMouseInput();
         UpdateLine();
+        tsumValueText.text = GetSelectedString();
     }
 
     void SpawnTsum()
     {
         if (tsumPrefabs.Length == 0) return;
-        int index = Random.Range(0, tsumPrefabs.Length);
+        int index = UnityEngine.Random.Range(0, tsumPrefabs.Length);
         GameObject tsum = Instantiate(tsumPrefabs[index], spawnPoint.position, Quaternion.identity);
         tsumList.Add(tsum);
+
+        int valueIndex = UnityEngine.Random.Range(0, valueList.Count);
+        Mino mino = tsum.GetComponent<Mino>();
+        if (mino != null)
+        {
+            mino.SetText(valueList[valueIndex]);
+        }
 
         Rigidbody2D rb = tsum.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            float xForce = Random.Range(-0.5f, 0.5f);
-            float yForce = Random.Range(-1.0f, -2.0f);
+            float xForce = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float yForce = UnityEngine.Random.Range(-1.0f, -2.0f);
             rb.AddForce(new Vector2(xForce, yForce), ForceMode2D.Impulse);
         }
     }
@@ -79,10 +92,10 @@ public class suusuuGameController : MonoBehaviour
             if (hit != null && hit.CompareTag("Mino"))
             {
                 GameObject tsum = hit.gameObject;
+                Mino mino = tsum.GetComponent<Mino>();
                 if (!selectedTsums.Contains(tsum))
                 {
-
-                    if (selectedTsums.Count == 0 || IsWithinDistance(tsum, selectedTsums[selectedTsums.Count - 1]))
+                    if ((selectedTsums.Count == 0 && mino.isNumber) || (selectedTsums.Count != 0 && IsWithinDistance(tsum, selectedTsums[selectedTsums.Count - 1]) && (mino.isNumber || selectedTsums[selectedTsums.Count - 1].GetComponent<Mino>().isNumber)))
                     {
                         selectedTsums.Add(tsum);
                         HighlightTsum(tsum, true);
@@ -98,7 +111,7 @@ public class suusuuGameController : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            if (selectedTsums.Count >= 3)
+            if (selectedTsums.Count >= 3 && IsValidEquationChain(GetSelectedString()))
             {
                 foreach (var tsum in selectedTsums)
                 {
@@ -155,5 +168,68 @@ public class suusuuGameController : MonoBehaviour
             HighlightTsum(tsum, false);
         }
         selectedTsums.Clear();
+    }
+
+    public string GetSelectedString()
+    {
+        string result = "";
+        foreach (var tsum in selectedTsums)
+        {
+            result += tsum.GetComponent<Mino>().Value;
+        }
+        return result;
+    }
+
+    public static bool IsValidEquationChain(string input)
+    {
+        try
+        {
+            string[] expressions = input.Split('=');
+            if (expressions.Length < 2)
+                return false;
+
+            List<double> results = new List<double>();
+
+            foreach (string expr in expressions)
+            {
+                var value = EvaluateExpression(expr);
+                results.Add(value);
+            }
+
+            for (int i = 1; i < results.Count; i++)
+            {
+                if (Math.Abs(results[i] - results[i - 1]) > 0.00001)
+                    return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static double EvaluateExpression(string expression)
+    {
+        var dt = new DataTable();
+        var result = dt.Compute(expression, "");
+        return Convert.ToDouble(result);
+    }
+
+    public void screw_Mino()
+    {
+        GameObject[] allMino = GameObject.FindGameObjectsWithTag("Mino");
+        
+        foreach (GameObject minoObj in allMino)
+        {
+            Rigidbody2D rb = minoObj.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                float xForce = UnityEngine.Random.Range(-5f, 5f);
+                float yForce = UnityEngine.Random.Range(0f, 10f);
+                rb.AddForce(new Vector2(xForce, yForce), ForceMode2D.Impulse);
+            }
+        }
     }
 }
