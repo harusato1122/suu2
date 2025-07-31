@@ -23,6 +23,7 @@ public class suusuuGameController : MonoBehaviour
     private LineRenderer lineRenderer;
     private int fiverPoint = 0;
     private int fiverPointplus = 10;
+    private int fiverPointminus = -2;
     private int fiverPointMax = 100;
     private bool isFiver = false;
     public Slider fiverSlider;
@@ -54,7 +55,7 @@ public class suusuuGameController : MonoBehaviour
         timer += Time.deltaTime;
         if (timer >= fiverInterval && isFiver)
         {
-            fiverPoint -= fiverPointplus; 
+            fiverPoint += fiverPointminus; 
             if( fiverPoint <= 0)
             {
                 isFiver = false;
