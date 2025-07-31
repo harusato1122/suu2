@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using TMPro;
 using System;
@@ -15,8 +16,11 @@ public class suusuuGameController : MonoBehaviour
     public List<string> valueList = new List<string>();
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI tsumValueText;
+    public TextMeshProUGUI timerText;
+    public GameObject retryButton;
 
-    private float timer;
+    private float Fivertimer;
+    private float timer = 60f;
     private List<GameObject> tsumList = new List<GameObject>();
     private List<GameObject> selectedTsums = new List<GameObject>();
     private Camera mainCamera;
@@ -28,6 +32,7 @@ public class suusuuGameController : MonoBehaviour
     private bool isFiver = false;
     public Slider fiverSlider;
     public double Score = 0;
+    public bool gameend = false;
 
     void Start()
     {
@@ -52,8 +57,13 @@ public class suusuuGameController : MonoBehaviour
 
     void Update()
     {
-        timer += Time.deltaTime;
-        if (timer >= fiverInterval && isFiver)
+        if (gameend)
+        {
+            return;
+        }
+        Fivertimer += Time.deltaTime;
+        timer -= Time.deltaTime;
+        if (Fivertimer >= fiverInterval && isFiver)
         {
             fiverPoint += fiverPointminus; 
             if( fiverPoint <= 0)
@@ -61,7 +71,7 @@ public class suusuuGameController : MonoBehaviour
                 isFiver = false;
                 fiverPoint = 0;
             }
-            timer = 0f;
+            Fivertimer = 0f;
         }
 
         HandleMouseInput();
@@ -69,6 +79,14 @@ public class suusuuGameController : MonoBehaviour
         tsumValueText.text = GetSelectedString();
         fiverSlider.value = (float)fiverPoint / fiverPointMax;
         scoreText.text = "Score: " + Score.ToString("F2");
+        timerText.text = timer.ToString("F0");
+        if(timer <= 0)
+        {
+            retryButton.SetActive(true);
+            gameend = true;
+            timer = 0f;
+
+        }
     }
 
     void SpawnTsum()
@@ -264,8 +282,13 @@ public class suusuuGameController : MonoBehaviour
         if(fiverPoint >= fiverPointMax)
         {
             isFiver = true;
-            timer = 0f;
+            Fivertimer = 0f;
             fiverPoint = fiverPointMax;
         }
+    }
+
+    public void OnRetryButtonPressed()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
